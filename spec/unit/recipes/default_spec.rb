@@ -12,15 +12,21 @@ describe 'mongo::default' do
     # https://github.com/chefspec/fauxhai/blob/master/PLATFORMS.md
     platform 'ubuntu', '18.04'
 
-    it 'converges successfully' do
-      expect { chef_run }.to_not raise_error
+    it 'updates packages' do
+      expect(chef_run).to periodic_apt_update('all platforms')
     end
-  end
 
-  context 'When all attributes are default, on CentOS 7' do
-    # for a complete list of available platforms and versions see:
-    # https://github.com/chefspec/fauxhai/blob/master/PLATFORMS.md
-    platform 'centos', '7'
+    it 'should be in source list' do
+      expect{ is_expected.to render_file('/etc/apt/sources.list').with_content("mongo") }
+    end
+
+    it 'installs MongoDB' do
+      expect(chef_run).to install_package 'mongodb'
+    end
+
+    it 'shows starting MongoDB' do
+      expect(chef_run).to start_service 'mongodb'
+    end
 
     it 'converges successfully' do
       expect { chef_run }.to_not raise_error
